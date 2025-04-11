@@ -56,8 +56,8 @@ def check_captcha():
     except:
         get_result()
 
-sno = 1  # Define sno at the module level
-flag = 1  # Define flag at the module level
+sno = 1
+flag = 1
 
 def head():
     wait = WebDriverWait(driver, 1)
@@ -74,9 +74,9 @@ def head():
         cell.font = header_font
 
 def get_result():
-    global sno  # Declare sno as global at the start
+    global sno
     wait = WebDriverWait(driver, 2)
-    det = [sno]  # Now sno can be used
+    det = [sno]
     try:
         alert = driver.switch_to.alert
         alert.accept()
@@ -96,7 +96,7 @@ def get_result():
         ws.append(det)
         sno += 1
 
-        reset_btn = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_btnReset"]')))
+        reset_btn = wait.until(EC.element_to_be_clickable((By.XPATH, 'ctl00_ContentPlaceHolder1_btnReset"]')))
         reset_btn.click()
         wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_txtrollno"]')))
         print(f"{det[2]}  {det[3]}")  # CGPA and RESULT
@@ -130,6 +130,17 @@ def process_roll_numbers(file_path, course, semester, output_folder):
     str_filename = "results"
     csv_directory = output_folder
 
+    # Validate CSV format
+    try:
+        data = pd.read_csv(file_path)
+        if data.empty or len(data.columns) < 1:
+            raise ValueError("CSV is empty or invalid")
+        # Rename first column to ensure consistency
+        data.columns = ['Roll Number'] + list(data.columns[1:])
+        data.to_csv(file_path, index=False)
+    except Exception as e:
+        raise ValueError(f"Invalid CSV file: {str(e)}")
+
     sel()
     return os.path.join(csv_directory, str_filename + ".xlsx")
 
@@ -157,7 +168,7 @@ def sel():
             data = pd.read_csv(f)
             roll = data.values.tolist()
 
-        head()  # Set up Excel headers once before processing roll numbers
+        head()
 
         for num in range(len(roll)):
             max_retries = 2
@@ -166,11 +177,11 @@ def sel():
                     wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_txtrollno"]')))
                     roll_input = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_txtrollno"]')))
                     roll_input.clear()
-                    roll_input.send_keys(roll[num][0])
+                    roll_input.send_keys(str(roll[num][0]))  # Convert to string to handle any format
                     break
                 except StaleElementReferenceException:
                     if attempt < max_retries - 1:
-                        time.sleep(1)
+                        time.sleep(0.1)
                         continue
                     else:
                         print(f"Failed for {roll[num][0]} after {max_retries} attempts")
