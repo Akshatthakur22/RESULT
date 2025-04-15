@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: rgpv-result-processor
+    env: python
+    region: oregon # Choose oregon or another region; free tier available
+    plan: free # Free tier with 0.5GB RAM, 750 hours/month
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --workers 1 --threads 8 --timeout 0 app:app"
+    envVars:
+      - key: TESSERACT_PATH
+        value: /usr/bin/tesseract
+    disk:
+      name: persistent-disk
+      mountPath: /data
+      sizeGB: 1
+    healthCheckPath: / # Optional: Checks if the root route responds
+    autoDeploy: true # Deploys on every git push to the linked branch
