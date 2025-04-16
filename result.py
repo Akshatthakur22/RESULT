@@ -17,7 +17,7 @@ import cv2
 from selenium.common.exceptions import StaleElementReferenceException
 from tqdm import tqdm  # Added for progress tracking
 
-pytesseract.pytesseract.tesseract_cmd = os.getenv("TESSERACT_PATH", r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'  # Common path in Linux environments
 
 
 # Globals for Excel
